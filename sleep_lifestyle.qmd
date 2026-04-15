@@ -6,12 +6,21 @@ editor:
     wrap: sentence
 ---
 
-Importing/Cleaning Data:
+**Importing/Cleaning Data:**
 
 ```{r}
 library(tidyverse)
 
-sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")
+sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
+  rename(
+    sleep_quality = `Quality of Sleep`,
+    sleep_duration = `Sleep Duration`,
+    physical_activity = `Physical Activity Level`,
+    stress_level = `Stress Level`,
+    bmi_category = `BMI Category`,
+    sleep_disorder = `Sleep Disorder`
+  ) |>
+  select(-`Person ID`, -`Blood Pressure`, - `Heart Rate`, -`Daily Steps`)
 ```
 
 **Introduction:**
@@ -39,13 +48,10 @@ Sleep Disorder: Categorical variable indicating presence of a sleep disorder (e.
 Lifestyle Variables
 
 Physical Activity Level: Measure of daily physical activity (often minutes per day).
-Daily Steps: Total number of steps taken per day.
+
 Stress Level: Self-reported stress level (ordinal scale).
 Occupation: Job category of the individual.
-May relate to lifestyle and stress patterns.
 
 Health Indicators
 
 BMI Category: Categorical variable (e.g., Underweight, Normal, Overweight, Obese).
-Heart Rate: Resting heart rate (beats per minute).
-Blood Pressure: Blood pressure reading (typically systolic/diastolic).
