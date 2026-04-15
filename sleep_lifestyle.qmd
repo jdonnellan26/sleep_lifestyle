@@ -1,5 +1,51 @@
 ---
 title: "sleep_lifestyle"
 format: html
+editor: 
+  markdown: 
+    wrap: sentence
 ---
 
+Importing/Cleaning Data:
+
+```{r}
+library(tidyverse)
+
+sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")
+```
+
+**Introduction:**
+
+This dataset via Kaggle explores the relationship between lifestyle behaviors and sleep health.
+It combines demographic, physiological, and behavioral variables to provide a comprehensive view of factors that may influence sleep quality and duration.
+
+**Research Question:**
+
+How do lifestyle factors—specifically physical activity, stress, and BMI—influence sleep quality and the likelihood of sleep disorders?
+
+**Variables Description:**
+
+Demographic Variables
+
+Gender: Categorical variable indicating gender.
+Age: Age of the individual (numeric).
+
+Sleep Metrics
+
+Sleep Duration: Number of hours an individual sleeps per night.
+Quality of Sleep: A score representing sleep quality (typically on a scale, e.g., 1–10).
+Sleep Disorder: Categorical variable indicating presence of a sleep disorder (e.g., None, Insomnia, Sleep Apnea).
+
+Lifestyle Variables
+
+Physical Activity Level: Measure of daily physical activity (often minutes per day).
+Daily Steps: Total number of steps taken per day.
+Stress Level: Self-reported stress level (ordinal scale).
+Occupation: Job category of the individual.
+May relate to lifestyle and stress patterns.
+
+Health Indicators
+
+BMI Category: Categorical variable (e.g., Underweight, Normal, Overweight, Obese).
+Heart Rate: Resting heart rate (beats per minute).
+Blood Pressure: Blood pressure reading (typically systolic/diastolic).
