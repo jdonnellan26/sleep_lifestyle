@@ -10,6 +10,7 @@ editor:
 
 ```{r}
 library(tidyverse)
+library(plotly)
 
 sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
   rename(
@@ -20,7 +21,15 @@ sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
     bmi_category = `BMI Category`,
     sleep_disorder = `Sleep Disorder`
   ) |>
-  select(-`Person ID`, -`Blood Pressure`, - `Heart Rate`, -`Daily Steps`)
+  select(-`Person ID`, -`Blood Pressure`, - `Heart Rate`, -`Daily Steps`)|>
+  #used the help of chatgpt for these mutates:
+  #prompt: How can I adjust the response "Normal Weight" to "Normal"
+  #Prompt: How can I reorder facets and bars in my bar graph using factor?
+  mutate(bmi_category = str_replace(bmi_category,
+                                       "Normal Weight", "Normal"),
+         bmi_category = fct_relevel(bmi_category, "Normal", "Overweight","Obese"),
+         sleep_disorder = fct_relevel(sleep_disorder, "None", "Insomnia", "Sleep Apnea")
+  )
 ```
 
 **Introduction:**
@@ -55,3 +64,149 @@ Occupation: Job category of the individual.
 Health Indicators
 
 BMI Category: Categorical variable (e.g., Underweight, Normal, Overweight, Obese).
+
+
+Graph #1
+```{r}
+ggplot(sleep, aes(x = sleep_duration)) +
+  geom_histogram(fill = "steelblue", aes(y = after_stat(density)))+
+  geom_density(color = "steelblue", fill = "skyblue", alpha = .5)+
+  labs(
+    title = "Distribution of Sleep Quality",
+    x = "Sleep Duration",
+    y = "Density"
+  ) +
+  theme_minimal()
+```
+
+Graph #2
+```{r}
+by_occupation <- sleep|>
+  group_by(Occupation)|>
+  summarise(
+    n = n(),
+    avg_sleep_hrs = mean(sleep_duration),
+    avg_sleep_quality = mean(sleep_quality),
+    avg_stress = mean(stress_level),
+    avg_activity = mean(physical_activity))|>
+  filter(n > 2)
+
+sleep_vs_stress <- ggplot(by_occupation, aes(x = avg_sleep_hrs, y = avg_stress, label = Occupation, color = Occupation))+
+  geom_point(size = 4) +
+  geom_smooth(aes(x = avg_sleep_hrs, y = avg_stress), method = lm)+
+  labs(
+    title = "The Effects of Stress on Sleep by Occupation",
+    x = "Average Sleep Duration",
+    y = "Average Stress Level",
+    caption = "Each point is an Occupation"
+  ) +
+  theme_minimal()+
+  theme(legend.position = "none")
+  
+
+ggplotly(sleep_vs_stress, tooltip = "label")
+  
+```
+
+Graph #3:
+```{r}
+ggplot(sleep, aes(x = sleep_disorder, fill = sleep_disorder, alpha = .6, color = sleep_disorder))+
+  geom_histogram(stat= "count")+
+  facet_grid(~bmi_category)+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  labs(
+    title = "Sleep Disorders by BMI Catagory",
+    x = "Sleep Disorder",
+    y = "Count")
+```
+
+
+Shiny App
+```{r}
+library(shiny)
+library(tidyverse)
+library(glue)
+
+#Strictly for appearance I asked chat to help my all the variable names, title, and table labels cleaner. Definitely not necessary but I wanted it too look clean.
+pretty_label <- function(x) {
+  str_replace_all(x, "_", " ") |> str_to_title()
+}
+occupation_choices <- unique(sleep$Occupation)
+
+#Chat Gpt helped me make the variables appear cleaner in the drop down
+var_choices <- c(
+  "Age"               = "Age",
+  "Sleep Duration"    = "sleep_duration",
+  "Sleep Quality"     = "sleep_quality",
+  "Physical Activity" = "physical_activity",
+  "Stress Level"      = "stress_level"
+)
+
+ui <- fluidPage(
+   sidebarLayout(
+    sidebarPanel(
+      #Chat GPT helped me learn how to create multiple selection input
+      checkboxGroupInput(
+        "occupation_choose",
+        label = "Select Occupation(s):",
+        choices = occupation_choices,
+        selected = "Doctor"),
+      
+      selectInput("xaxis_choose",
+                  label = "Choose X-Axis Variable:",
+                  choices = var_choices,
+                  selected = "Age"),
+      
+      selectInput("yaxis_choose",
+                  label = "Choose Y-Axis Variable:",
+                  choices = var_choices,
+                  selected = "sleep_duration")),
+    
+    mainPanel(
+      plotOutput("final_plot"),
+      tableOutput("final_table")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  plot_sleep <- reactive({
+    sleep |> filter(Occupation %in% input$occupation_choose)
+  })
+  
+  output$final_plot <- renderPlot({
+    ggplot(plot_sleep(),
+           aes(x = .data[[input$xaxis_choose]],
+               y = .data[[input$yaxis_choose]],
+               color = Occupation)) +
+      geom_point(size = 2) +
+      theme_minimal(base_size = 15) +
+      labs(
+        #Chat gpt helped me learn how to use pretty_label function to clean up the titles on graph
+        title = glue("Scatterplot of {pretty_label(input$yaxis_choose)} vs {pretty_label(input$xaxis_choose)}"),
+        x = pretty_label(input$xaxis_choose),
+        y = pretty_label(input$yaxis_choose),
+        color = "Occupation")
+  })
+  
+  output$final_table <- renderTable({
+    plot_sleep() |>
+      group_by(Occupation) |>
+      summarise(
+        N = n(),
+        #Chat Gpt helped me clean up the names of the table to make it look cleaner
+        !!glue("Min {pretty_label(input$yaxis_choose)}")  := min(.data[[input$yaxis_choose]]),
+        !!glue("Mean {pretty_label(input$yaxis_choose)}") := mean(.data[[input$yaxis_choose]]),
+        !!glue("Max {pretty_label(input$yaxis_choose)}")  := max(.data[[input$yaxis_choose]]),
+        !!glue("Min {pretty_label(input$xaxis_choose)}")  := min(.data[[input$xaxis_choose]]),
+        !!glue("Mean {pretty_label(input$xaxis_choose)}") := mean(.data[[input$xaxis_choose]]),
+        !!glue("Max {pretty_label(input$xaxis_choose)}")  := max(.data[[input$xaxis_choose]]))
+  })
+}
+
+shinyApp(ui, server)
+
+```
+
