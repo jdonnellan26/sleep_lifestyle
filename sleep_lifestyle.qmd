@@ -72,7 +72,7 @@ ggplot(sleep, aes(x = sleep_duration)) +
   geom_histogram(fill = "steelblue", aes(y = after_stat(density)))+
   geom_density(color = "steelblue", fill = "skyblue", alpha = .5)+
   labs(
-    title = "Distribution of Sleep Quality",
+    title = "Distribution of Sleep Duration",
     x = "Sleep Duration",
     y = "Density"
   ) +
@@ -110,7 +110,7 @@ ggplotly(sleep_vs_stress, tooltip = "label")
 
 Graph #3:
 ```{r}
-ggplot(sleep, aes(x = sleep_disorder, fill = sleep_disorder, alpha = .6, color = sleep_disorder))+
+ggplot(sleep, aes(x = sleep_disorder, fill = sleep_disorder, alpha = .7, color = sleep_disorder))+
   geom_histogram(stat= "count")+
   facet_grid(~bmi_category)+
   theme_minimal()+
@@ -128,7 +128,7 @@ library(shiny)
 library(tidyverse)
 library(glue)
 
-#Strictly for appearance I asked chat to help my all the variable names, title, and table labels cleaner. Definitely not necessary but I wanted it too look clean.
+#Strictly for appearance I asked chat to help make all the variable names, title, and table labels cleaner. Definitely not necessary but I wanted it to look clean.
 pretty_label <- function(x) {
   str_replace_all(x, "_", " ") |> str_to_title()
 }
@@ -165,7 +165,9 @@ ui <- fluidPage(
     
     mainPanel(
       plotOutput("final_plot"),
+      plotOutput("second_plot"),
       tableOutput("final_table")
+      
     )
   )
 )
@@ -184,11 +186,24 @@ server <- function(input, output, session) {
       geom_point(size = 2) +
       theme_minimal(base_size = 15) +
       labs(
-        #Chat gpt helped me learn how to use pretty_label function to clean up the titles on graph
+        #Chat gpt helped me learn how to use pretty_label function to clean up the   titles on graph
         title = glue("Scatterplot of {pretty_label(input$yaxis_choose)} vs {pretty_label(input$xaxis_choose)}"),
         x = pretty_label(input$xaxis_choose),
         y = pretty_label(input$yaxis_choose),
         color = "Occupation")
+  })
+  
+  output$second_plot <- renderPlot({
+    ggplot(plot_sleep(),
+           aes(x = sleep_disorder,
+               fill = sleep_disorder)) +
+      geom_histogram(stat= "count")+
+      theme_minimal(base_size = 15)+
+      theme(legend.position = "none")+
+      labs(
+        title = "Sleep Disorders by Occupation",
+        x = "Sleep Disorder",
+        y = "Count")
   })
   
   output$final_table <- renderTable({
