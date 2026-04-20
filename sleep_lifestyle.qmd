@@ -39,7 +39,7 @@ It combines demographic, physiological, and behavioral variables to provide a co
 
 **Research Question:**
 
-How do lifestyle factors—specifically physical activity, stress, and BMI—influence sleep quality and the likelihood of sleep disorders?
+How do lifestyle factors— occupation, physical activity, stress, and BMI—influence sleep quality and the likelihood of sleep disorders?
 
 **Variables Description:**
 
@@ -66,7 +66,7 @@ Health Indicators
 BMI Category: Categorical variable (e.g., Underweight, Normal, Overweight, Obese).
 
 
-Graph #1
+**Graph #1**
 ```{r}
 ggplot(sleep, aes(x = sleep_duration)) +
   geom_histogram(fill = "steelblue", aes(y = after_stat(density)))+
@@ -76,10 +76,11 @@ ggplot(sleep, aes(x = sleep_duration)) +
     x = "Sleep Duration",
     y = "Density"
   ) +
-  theme_minimal()
+  theme_minimal()+
+  facet_wrap(~Gender)
 ```
 
-Graph #2
+**Graph #2**
 ```{r}
 by_occupation <- sleep|>
   group_by(Occupation)|>
@@ -93,7 +94,7 @@ by_occupation <- sleep|>
 
 sleep_vs_stress <- ggplot(by_occupation, aes(x = avg_sleep_hrs, y = avg_stress, label = Occupation, color = Occupation))+
   geom_point(size = 4) +
-  geom_smooth(aes(x = avg_sleep_hrs, y = avg_stress), method = lm)+
+  geom_smooth(data = sleep, aes(x = sleep_duration, y = stress_level, group = 1), method = lm, se = FALSE, color = "lightgrey")+
   labs(
     title = "The Effects of Stress on Sleep by Occupation",
     x = "Average Sleep Duration",
@@ -108,7 +109,7 @@ ggplotly(sleep_vs_stress, tooltip = "label")
   
 ```
 
-Graph #3:
+**Graph #3:**
 ```{r}
 ggplot(sleep, aes(x = sleep_disorder, fill = sleep_disorder, alpha = .7, color = sleep_disorder))+
   geom_histogram(stat= "count")+
@@ -122,7 +123,7 @@ ggplot(sleep, aes(x = sleep_disorder, fill = sleep_disorder, alpha = .7, color =
 ```
 
 
-Shiny App
+**Shiny App**
 ```{r}
 library(shiny)
 library(tidyverse)
@@ -151,7 +152,7 @@ ui <- fluidPage(
         "occupation_choose",
         label = "Select Occupation(s):",
         choices = occupation_choices,
-        selected = "Doctor"),
+        selected = c("Lawyer", "Software Engineer", "Doctor", "Sales Representative","Teacher", "Nurse", "Engineer", "Salesperson", "Manager", "Scientist", "Accountant")),
       
       selectInput("xaxis_choose",
                   label = "Choose X-Axis Variable:",
@@ -184,6 +185,8 @@ server <- function(input, output, session) {
                y = .data[[input$yaxis_choose]],
                color = Occupation)) +
       geom_point(size = 2) +
+      #I wanted to create a geom_smooth for the complete data not specific to each occupation. Chat Gpt advised me to use aes(group = 1)
+      geom_smooth(aes(group = 1), method = lm, se = FALSE, color = "grey")+
       theme_minimal(base_size = 15) +
       labs(
         #Chat gpt helped me learn how to use pretty_label function to clean up the   titles on graph
