@@ -68,17 +68,26 @@ BMI Category: Categorical variable (e.g., Underweight, Normal, Overweight, Obese
 
 **Graph #1**
 ```{r}
+sleep |>
+  group_by(Gender)|>
+  summarize(
+    mean = mean(sleep_duration))
+
+
 ggplot(sleep, aes(x = sleep_duration)) +
-  geom_histogram(fill = "steelblue", aes(y = after_stat(density)))+
-  geom_density(color = "steelblue", fill = "skyblue", alpha = .5)+
+  geom_histogram(fill = "steelblue", color = "navy",bins = 15, aes(y = after_stat(density)))+
+  geom_density(color = "navy", fill = "skyblue", alpha = .5)+
   labs(
     title = "Distribution of Sleep Duration",
     x = "Sleep Duration",
     y = "Density"
   ) +
   theme_minimal()+
-  facet_wrap(~Gender)
+  facet_grid(~Gender)
 ```
+
+Interpretation:
+Graph #1 introduces the variable "Sleep Duration" by showing the distribution faceted by gender. For context the means differ slightly with the mean duration for females being 7.23 hrs and males 7.04 hrs. Both distributions and skewed or normal. The purpose of this graph is to demonstrate that the data has an even amount of long sleepers and short sleeper that we will dive into more detail with later in the examination.  
 
 **Graph #2**
 ```{r}
@@ -108,6 +117,9 @@ sleep_vs_stress <- ggplot(by_occupation, aes(x = avg_sleep_hrs, y = avg_stress, 
 ggplotly(sleep_vs_stress, tooltip = "label")
   
 ```
+
+Interpreatation:
+Graph #2 shows the effect of Sleep Duration on perceived Stress Levels. This data is grouped by Occuaption. To help identify which dot is which occupation, hovering the dot will reveal the occupation name. The graph shows the negative correlation between the two variables concluding that ioncreased sleep leads to lower levels of stress. We see that engineers sleep the most and are least stress while Scientist 
 
 **Graph #3:**
 ```{r}
