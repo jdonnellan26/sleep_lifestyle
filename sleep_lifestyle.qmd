@@ -19,14 +19,14 @@ sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
     physical_activity = `Physical Activity Level`,
     stress_level = `Stress Level`,
     bmi_category = `BMI Category`,
-    sleep_disorder = `Sleep Disorder`
-  ) |>
+    sleep_disorder = `Sleep Disorder`) |>
   select(-`Person ID`, -`Blood Pressure`, - `Heart Rate`, -`Daily Steps`)|>
+  
   #used the help of chatgpt for these mutates:
   #prompt: How can I adjust the response "Normal Weight" to "Normal"
   #Prompt: How can I reorder facets and bars in my bar graph using factor?
-  mutate(bmi_category = str_replace(bmi_category,
-                                       "Normal Weight", "Normal"),
+  mutate(bmi_category = str_replace(bmi_category,"Normal Weight", "Normal"),
+         Occupation = str_replace(Occupation, "Sales Representative", "Salesperson"),
          bmi_category = fct_relevel(bmi_category, "Normal", "Overweight","Obese"),
          sleep_disorder = fct_relevel(sleep_disorder, "None", "Insomnia", "Sleep Apnea")
   )
@@ -34,39 +34,42 @@ sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
 
 **Introduction:**
 
-This dataset via Kaggle explores the relationship between lifestyle behaviors and sleep health.
-It combines demographic, physiological, and behavioral variables to provide a comprehensive view of factors that may influence sleep quality and duration.
+This dataset from Kaggle looks at how everyday lifestyle factors relate to sleep. It includes 374 observations across 10 different occupations and contains information on sleep duration, stress levels, physical activity, BMI, and sleep disorders. The data allows us to compare sleep patterns across different groups and see how factors like stress, health, and occupation are connected to sleep.
 
 **Research Question:**
 
-How do lifestyle factors— occupation, physical activity, stress, and BMI—influence sleep quality and the likelihood of sleep disorders?
+How do lifestyle factors: occupation, physical activity, stress, and BMI influence sleep quality and the likelihood of sleep disorders?
 
 **Variables Description:**
 
 Demographic Variables
 
-Gender: Categorical variable indicating gender.
-Age: Age of the individual (numeric).
+-   Gender: Categorical variable indicating gender.
+
+-   Age: Age of the individual.
 
 Sleep Metrics
 
-Sleep Duration: Number of hours an individual sleeps per night.
-Quality of Sleep: A score representing sleep quality (typically on a scale, e.g., 1–10).
-Sleep Disorder: Categorical variable indicating presence of a sleep disorder (e.g., None, Insomnia, Sleep Apnea).
+-   Sleep Duration: Number of hours an individual sleeps per night.
+
+-   Quality of Sleep: A score representing sleep quality (typically on a scale, e.g., 1–10).
+
+-   Sleep Disorder: Categorical variable indicating presence of a sleep disorder (e.g., None, Insomnia, Sleep Apnea).
 
 Lifestyle Variables
 
-Physical Activity Level: Measure of daily physical activity (often minutes per day).
+-   Physical Activity Level: Measure of daily physical activity (often minutes per day).
 
-Stress Level: Self-reported stress level (ordinal scale).
-Occupation: Job category of the individual.
+-   Stress Level: Self reported stress level (ordinal scale).
+
+-   Occupation: Job category of the individual.
 
 Health Indicators
 
-BMI Category: Categorical variable (e.g., Underweight, Normal, Overweight, Obese).
-
+-   BMI Category: Categorical variable (e.g., Underweight, Normal, Overweight, Obese).
 
 **Graph #1**
+
 ```{r}
 sleep |>
   group_by(Gender)|>
@@ -75,7 +78,7 @@ sleep |>
 
 
 ggplot(sleep, aes(x = sleep_duration)) +
-  geom_histogram(fill = "steelblue", color = "navy",bins = 15, aes(y = after_stat(density)))+
+  geom_histogram(fill = "steelblue", color = "navy", bins = 10, aes(y = after_stat(density)))+
   geom_density(color = "navy", fill = "skyblue", alpha = .5)+
   labs(
     title = "Distribution of Sleep Duration",
@@ -86,10 +89,13 @@ ggplot(sleep, aes(x = sleep_duration)) +
   facet_grid(~Gender)
 ```
 
-Interpretation:
-Graph #1 introduces the variable "Sleep Duration" by showing the distribution faceted by gender. For context the means differ slightly with the mean duration for females being 7.23 hrs and males 7.04 hrs. Both distributions and skewed or normal. The purpose of this graph is to demonstrate that the data has an even amount of long sleepers and short sleeper that we will dive into more detail with later in the examination.  
+Interpretation: Graph 1 introduces the variable sleep duration by showing its distribution separately for males and females.
+Females average slightly more sleep at 7.23 hours, compared with 7.04 hours for males, though the difference is small.
+Both groups show a similar pattern, with most individuals sleeping between 6 and 8 hours, and neither gender appears strongly skewed.
+This suggests that sleep duration is fairly consistent across genders, providing a balanced starting point for examining how sleep relates to other variables in the dataset.
 
 **Graph #2**
+
 ```{r}
 by_occupation <- sleep|>
   group_by(Occupation)|>
@@ -98,12 +104,11 @@ by_occupation <- sleep|>
     avg_sleep_hrs = mean(sleep_duration),
     avg_sleep_quality = mean(sleep_quality),
     avg_stress = mean(stress_level),
-    avg_activity = mean(physical_activity))|>
-  filter(n > 2)
+    avg_activity = mean(physical_activity))
 
 sleep_vs_stress <- ggplot(by_occupation, aes(x = avg_sleep_hrs, y = avg_stress, label = Occupation, color = Occupation))+
   geom_point(size = 4) +
-  geom_smooth(data = sleep, aes(x = sleep_duration, y = stress_level, group = 1), method = lm, se = FALSE, color = "lightgrey")+
+  geom_smooth(data = sleep, aes(x = sleep_duration, y = stress_level, group = 1), method = lm, se = FALSE, color = "grey90")+
   labs(
     title = "The Effects of Stress on Sleep by Occupation",
     x = "Average Sleep Duration",
@@ -111,17 +116,21 @@ sleep_vs_stress <- ggplot(by_occupation, aes(x = avg_sleep_hrs, y = avg_stress, 
     caption = "Each point is an Occupation"
   ) +
   theme_minimal()+
-  theme(legend.position = "none")
+  theme(legend.position = "none")+
+  scale_color_brewer(palette = "Paired")
   
 
 ggplotly(sleep_vs_stress, tooltip = "label")
   
 ```
 
-Interpreatation:
-Graph #2 shows the effect of Sleep Duration on perceived Stress Levels. This data is grouped by Occuaption. To help identify which dot is which occupation, hovering the dot will reveal the occupation name. The graph shows the negative correlation between the two variables concluding that ioncreased sleep leads to lower levels of stress. We see that engineers sleep the most and are least stress while Scientist 
+Interpretation: Graph 2 examines the relationship between average sleep duration and average stress level across occupations.
+Each point represents an occupation, and the downward trend line shows a negative correlation between the two variables.
+Occupations with higher average sleep tend to report lower stress, while occupations with less sleep tend to report higher stress.
+Although this does not prove that sleep directly reduces stress, the graph suggests that sleep duration may be an important factor associated with perceived stress levels.
 
 **Graph #3:**
+
 ```{r}
 ggplot(sleep, aes(x = sleep_disorder, fill = sleep_disorder, alpha = .7, color = sleep_disorder))+
   geom_histogram(stat= "count")+
@@ -134,20 +143,26 @@ ggplot(sleep, aes(x = sleep_disorder, fill = sleep_disorder, alpha = .7, color =
     y = "Count")
 ```
 
+Interpretation: Graph 3 shows how sleep disorders vary across BMI categories.
+Individuals in the normal BMI category most often report no sleep disorder, while those in the overweight category show noticeably higher counts of both insomnia and sleep apnea.
+In the obese category, sleep disorders make up a larger share of the group, especially sleep apnea.
+Overall, the graph suggests that as BMI increases, the likelihood of experiencing a sleep disorder also increases.
 
 **Shiny App**
+
 ```{r}
 library(shiny)
 library(tidyverse)
 library(glue)
 
-#Strictly for appearance I asked chat to help make all the variable names, title, and table labels cleaner. Definitely not necessary but I wanted it to look clean.
+#Strictly for appearance I asked chat GPT to help make all the variable names, title, and table labels cleaner. Definitely not necessary but I wanted it to look clean. petty_label will be used several times later in the code
 pretty_label <- function(x) {
   str_replace_all(x, "_", " ") |> str_to_title()
 }
 occupation_choices <- unique(sleep$Occupation)
 
-#Chat Gpt helped me make the variables appear cleaner in the drop down
+#Chat GPT helped me make the variables appear cleaner in the drop down
+#Prompt: How can I rename my variable names in choices for my shiny app?
 var_choices <- c(
   "Age"               = "Age",
   "Sleep Duration"    = "sleep_duration",
@@ -160,11 +175,12 @@ ui <- fluidPage(
    sidebarLayout(
     sidebarPanel(
       #Chat GPT helped me learn how to create multiple selection input
+      #Prompt: Is there an option to allow for multiple boxes to be selected in my shiny sidebarpanel?
       checkboxGroupInput(
         "occupation_choose",
         label = "Select Occupation(s):",
         choices = occupation_choices,
-        selected = c("Lawyer", "Software Engineer", "Doctor", "Sales Representative","Teacher", "Nurse", "Engineer", "Salesperson", "Manager", "Scientist", "Accountant")),
+        selected = c("Lawyer", "Software Engineer", "Doctor","Teacher", "Nurse", "Engineer", "Salesperson", "Manager", "Scientist", "Accountant")),
       
       selectInput("xaxis_choose",
                   label = "Choose X-Axis Variable:",
@@ -197,15 +213,18 @@ server <- function(input, output, session) {
                y = .data[[input$yaxis_choose]],
                color = Occupation)) +
       geom_point(size = 2) +
-      #I wanted to create a geom_smooth for the complete data not specific to each occupation. Chat Gpt advised me to use aes(group = 1)
-      geom_smooth(aes(group = 1), method = lm, se = FALSE, color = "grey")+
+      #Used Chat GPT to create a geom_smooth for complete data
+      #Prompt: How can I create a single geom_smooth for my data that is currently grouped by color?
+      geom_smooth(aes(group = 1), method = lm, se = FALSE, color = "grey90")+
       theme_minimal(base_size = 15) +
       labs(
-        #Chat gpt helped me learn how to use pretty_label function to clean up the   titles on graph
+        #Used Chat GPT to learn how to use pretty_label function to clean up the titles on graph
+        # Prompt: Is there a function to clean up my labels on graphs and tables and how do I use it? Give me an example for "Title = glue::glue("Scatterplot of [[input$yaxis_choose]] vs [[input$xaxis_choose]]"
         title = glue("Scatterplot of {pretty_label(input$yaxis_choose)} vs {pretty_label(input$xaxis_choose)}"),
         x = pretty_label(input$xaxis_choose),
         y = pretty_label(input$yaxis_choose),
-        color = "Occupation")
+        color = "Occupation")+
+      scale_color_brewer(palette = "Paired")
   })
   
   output$second_plot <- renderPlot({
@@ -225,8 +244,15 @@ server <- function(input, output, session) {
     plot_sleep() |>
       group_by(Occupation) |>
       summarise(
+        #Used Chat GPT to clean up table column names
+        #Prompt: How can I use pretty label and glue package to clean up these table names/labels:
+        #Max_Y = max(.data[[input$yaxis_choose]], 
+        #Mean_Y = mean(.data[[input$yaxis_choose]]), 
+        #Min_Y = min(.data[[input$yaxis_choose]]), 
+        #Max_X = max(.data[[input$xaxis_choose]], 
+        #Mean_X = mean(.data[[input$xaxis_choose]]), 
+        #Min_X = mean(.data[[input$xaxis_choose]]))
         N = n(),
-        #Chat Gpt helped me clean up the names of the table to make it look cleaner
         !!glue("Min {pretty_label(input$yaxis_choose)}")  := min(.data[[input$yaxis_choose]]),
         !!glue("Mean {pretty_label(input$yaxis_choose)}") := mean(.data[[input$yaxis_choose]]),
         !!glue("Max {pretty_label(input$yaxis_choose)}")  := max(.data[[input$yaxis_choose]]),
@@ -239,4 +265,3 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 
 ```
-
