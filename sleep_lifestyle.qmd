@@ -21,12 +21,11 @@ sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
     bmi_category = `BMI Category`,
     sleep_disorder = `Sleep Disorder`) |>
   select(-`Person ID`, -`Blood Pressure`, - `Heart Rate`, -`Daily Steps`)|>
-  
-  #used the help of chatgpt for these mutates:
-  #prompt: How can I adjust the response "Normal Weight" to "Normal"
-  #Prompt: How can I reorder facets and bars in my bar graph using factor?
+  #Used Chat GPT to learn how to use fct_relevel and str_replace:
+  #prompt: How can I adjust the response "Normal Weight" to "Normal"?
   mutate(bmi_category = str_replace(bmi_category,"Normal Weight", "Normal"),
          Occupation = str_replace(Occupation, "Sales Representative", "Salesperson"),
+  #Prompt: How can I reorder facets and bars in my bar graph using factor?
          bmi_category = fct_relevel(bmi_category, "Normal", "Overweight","Obese"),
          sleep_disorder = fct_relevel(sleep_disorder, "None", "Insomnia", "Sleep Apnea")
   )
@@ -71,15 +70,19 @@ Health Indicators
 **Graph #1**
 
 ```{r}
-sleep |>
+avg <- sleep |>
   group_by(Gender)|>
   summarize(
     mean = mean(sleep_duration))
 
-
 ggplot(sleep, aes(x = sleep_duration)) +
-  geom_histogram(fill = "steelblue", color = "navy", bins = 10, aes(y = after_stat(density)))+
-  geom_density(color = "navy", fill = "skyblue", alpha = .5)+
+  geom_histogram(fill = "steelblue", 
+                 color = "navy", 
+                 bins = 12, 
+                 aes(y = after_stat(density)))+
+  geom_density(color = "navy", 
+               fill = "skyblue", 
+               alpha = .5)+
   labs(
     title = "Distribution of Sleep Duration",
     x = "Sleep Duration",
@@ -106,9 +109,19 @@ by_occupation <- sleep|>
     avg_stress = mean(stress_level),
     avg_activity = mean(physical_activity))
 
-sleep_vs_stress <- ggplot(by_occupation, aes(x = avg_sleep_hrs, y = avg_stress, label = Occupation, color = Occupation))+
+sleep_vs_stress <- ggplot(data = by_occupation, 
+                          aes(x = avg_sleep_hrs, 
+                              y = avg_stress, 
+                              label = Occupation, 
+                              color = Occupation))+
   geom_point(size = 4) +
-  geom_smooth(data = sleep, aes(x = sleep_duration, y = stress_level, group = 1), method = lm, se = FALSE, color = "grey90")+
+  geom_smooth(data = sleep, 
+              aes(x = sleep_duration, 
+                  y = stress_level, 
+                  group = 1), 
+              method = lm, 
+              se = FALSE, 
+              color = "grey90")+
   labs(
     title = "The Effects of Stress on Sleep by Occupation",
     x = "Average Sleep Duration",
@@ -132,7 +145,11 @@ Although this does not prove that sleep directly reduces stress, the graph sugge
 **Graph #3:**
 
 ```{r}
-ggplot(sleep, aes(x = sleep_disorder, fill = sleep_disorder, alpha = .7, color = sleep_disorder))+
+ggplot(data = sleep, 
+       aes(x = sleep_disorder, 
+           fill = sleep_disorder, 
+           alpha = .7, 
+           color = sleep_disorder))+
   geom_histogram(stat= "count")+
   facet_grid(~bmi_category)+
   theme_minimal()+
@@ -180,7 +197,15 @@ ui <- fluidPage(
         "occupation_choose",
         label = "Select Occupation(s):",
         choices = occupation_choices,
-        selected = c("Lawyer", "Software Engineer", "Doctor","Teacher", "Nurse", "Engineer", "Salesperson", "Manager", "Scientist", "Accountant")),
+        selected = c("Lawyer", 
+                     "Software Engineer", 
+                     "Doctor","Teacher", 
+                     "Nurse", 
+                     "Engineer", 
+                     "Salesperson", 
+                     "Manager", 
+                     "Scientist",
+                     "Accountant")),
       
       selectInput("xaxis_choose",
                   label = "Choose X-Axis Variable:",
@@ -215,7 +240,10 @@ server <- function(input, output, session) {
       geom_point(size = 2) +
       #Used Chat GPT to create a geom_smooth for complete data
       #Prompt: How can I create a single geom_smooth for my data that is currently grouped by color?
-      geom_smooth(aes(group = 1), method = lm, se = FALSE, color = "grey90")+
+      geom_smooth(aes(group = 1), 
+                  method = lm, 
+                  se = FALSE, 
+                  color = "grey90")+
       theme_minimal(base_size = 15) +
       labs(
         #Used Chat GPT to learn how to use pretty_label function to clean up the titles on graph
