@@ -1,5 +1,6 @@
 ---
 title: "Final Project Presentation"
+subtitle: "How lifestyle and health factors influence sleep duration and quality"
 author: "John Donnellan"
 format: 
   revealjs:
@@ -49,7 +50,7 @@ sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
     -   Health Indicators
 
         -   BMI Category, Heart Rate, Stress Level, Physical Activity Level
-        
+
 ## Research Question
 
 How do lifestyle and health factors such as occupation, physical activity, stress level, BMI category, and sleep disorders affect sleep duration and sleep quality?
@@ -139,24 +140,32 @@ sleep |>
 ```{r}
 sleep |>
   ggplot(aes(x = bmi_category,
-             y = sleep_quality,
+             y = sleep_duration,
              fill = bmi_category)) +
   geom_boxplot() +
   theme_minimal() +
   theme(legend.position = "none") +
   labs(
-    title = "Sleep Quality Across BMI Categories",
+    title = "Sleep Duration Across BMI Categories",
     x = "BMI Category",
-    y = "Sleep Quality"
+    y = "Sleep Duration"
   )
 ```
 
-
 ## Takeaways
 
-Negative linear relationship between sleep duration and sleep levels
+Key Findings
 
-Overweight individuals are more likely to have sleep disorders
+-   Higher stress levels are associated with lower sleep duration across occupations
 
-Sleep quality declines for overweight and obese individuals
+-   Overweight individuals report more sleep disorders, especially insomnia and sleep apnea
 
+-   Sleep duration tends to decline as BMI increases
+
+-   Obese individuals show the greatest variation in sleep duration
+
+## Future Research
+
+What causes stress in certain occupations?
+
+Why do certain occupations have increased sleep disorder rates?
