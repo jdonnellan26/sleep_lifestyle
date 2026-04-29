@@ -19,8 +19,9 @@ sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
     physical_activity = `Physical Activity Level`,
     stress_level = `Stress Level`,
     bmi_category = `BMI Category`,
-    sleep_disorder = `Sleep Disorder`) |>
-  select(-`Person ID`, -`Blood Pressure`, - `Heart Rate`, -`Daily Steps`)|>
+    sleep_disorder = `Sleep Disorder`,
+    heart_rate = `Heart Rate`) |>
+  select(-`Person ID`, -`Blood Pressure`, -`Daily Steps`)|>
   #Used Chat GPT to learn how to use fct_relevel and str_replace:
   #prompt: How can I adjust the response "Normal Weight" to "Normal"?
   mutate(bmi_category = str_replace(bmi_category,"Normal Weight", "Normal"),
@@ -37,7 +38,7 @@ This dataset from Kaggle looks at how everyday lifestyle factors relate to sleep
 
 **Research Question:**
 
-How do lifestyle factors: occupation, physical activity, stress, and BMI influence sleep quality and the likelihood of sleep disorders?
+How do lifestyle and health factors such as occupation, physical activity, stress level, BMI category, and sleep disorders affect sleep duration and sleep quality?
 
 **Variables Description:**
 
@@ -66,6 +67,8 @@ Lifestyle Variables
 Health Indicators
 
 -   BMI Category: Categorical variable (e.g., Underweight, Normal, Overweight, Obese).
+
+-   Heart Rate: Recorded heart rate while sleeping.
 
 **Graph #1**
 
@@ -168,7 +171,6 @@ Overall, the graph suggests that as BMI increases, the likelihood of experiencin
 Graph #4
 ```{r}
 sleep |>
-  filter(Occupation %in% c("Nurse", "Teacher", "Salesperson")) |>
   ggplot(aes(x = sleep_disorder,
              fill = sleep_disorder,
              color = sleep_disorder)) +
@@ -183,13 +185,36 @@ sleep |>
   )
 ```
 
-Graph #5
+Graph #6
 ```{r}
 sleep |>
-  filter(Occupation %in% c("Nurse", "Teacher", "Salesperson")) |>
-  ggplot(aes(x = sleep_duration, y = stress_level)) +
-  geom_point() +
-  facet_wrap(~Occupation)
+  ggplot(aes(x = bmi_category,
+             y = sleep_quality,
+             fill = bmi_category)) +
+  geom_boxplot() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Sleep Quality Across BMI Categories",
+    x = "BMI Category",
+    y = "Sleep Quality"
+  )
+```
+
+Graph #7
+```{r}
+sleep |>
+  ggplot(aes(x = sleep_disorder,
+             y = sleep_duration,
+             fill = sleep_disorder)) +
+  geom_boxplot(alpha = 0.7) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Sleep Duration by Sleep Disorder Status",
+    x = "Sleep Disorder",
+    y = "Sleep Duration"
+  )
 ```
 
 
@@ -213,7 +238,8 @@ var_choices <- c(
   "Sleep Duration"    = "sleep_duration",
   "Sleep Quality"     = "sleep_quality",
   "Physical Activity" = "physical_activity",
-  "Stress Level"      = "stress_level"
+  "Stress Level"      = "stress_level",
+  "Heart Rate"        = "heart_rate"
 )
 
 ui <- fluidPage(
