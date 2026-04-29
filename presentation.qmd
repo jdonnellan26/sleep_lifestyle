@@ -36,25 +36,23 @@ sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
 
 -   Data: Sleep Health and Lifestyle Dataset via Kaggle
 
-    -   https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset
-
 -   Variables:
 
     -   Demographic
 
-        -   Age, Gender
+        -   Age, Gender, Occupation
 
     -   Sleep Metrics
 
         -   Sleep Duration, Quality of Sleep, Sleep Disorder
 
-    -   Lifestyle
-
-        -   Occupation, Stress Level, Physical Activity Level
-
     -   Health Indicators
 
-        -   BMI Category, Heart Rate
+        -   BMI Category, Heart Rate, Stress Level, Physical Activity Level
+        
+## Research Question
+
+How do lifestyle and health factors such as occupation, physical activity, stress level, BMI category, and sleep disorders affect sleep duration and sleep quality?
 
 ## Sleep vs Stress by Occupation
 
@@ -97,8 +95,10 @@ ggplotly(sleep_vs_stress, tooltip = "label")
 ```
 
 ## Sleep Disorders
-::: {.panel-tabset}
+
+::: panel-tabset
 ### General
+
 ```{r}
 ggplot(data = sleep, 
        aes(x = sleep_disorder, 
@@ -114,7 +114,9 @@ ggplot(data = sleep,
     x = "Sleep Disorder",
     y = "Count")
 ```
+
 ### Occupational
+
 ```{r}
 sleep |>
   ggplot(aes(x = sleep_disorder,
@@ -131,131 +133,30 @@ sleep |>
   )
 ```
 :::
-## Shiny App
+
+## Duration by BMI Catagory
 
 ```{r}
-library(shiny)
-library(tidyverse)
-library(glue)
-
-#Strictly for appearance I asked chat GPT to help make all the variable names, title, and table labels cleaner. Definitely not necessary but I wanted it to look clean. petty_label will be used several times later in the code
-pretty_label <- function(x) {
-  str_replace_all(x, "_", " ") |> str_to_title()
-}
-occupation_choices <- unique(sleep$Occupation)
-
-#Chat GPT helped me make the variables appear cleaner in the drop down
-#Prompt: How can I rename my variable names in choices for my shiny app?
-var_choices <- c(
-  "Age"               = "Age",
-  "Sleep Duration"    = "sleep_duration",
-  "Sleep Quality"     = "sleep_quality",
-  "Physical Activity" = "physical_activity",
-  "Stress Level"      = "stress_level",
-  "Heart Rate"        = "heart_rate"
-)
-
-ui <- fluidPage(
-   sidebarLayout(
-    sidebarPanel(
-      #Chat GPT helped me learn how to create multiple selection input
-      #Prompt: Is there an option to allow for multiple boxes to be selected in my shiny sidebarpanel?
-      checkboxGroupInput(
-        "occupation_choose",
-        label = "Select Occupation(s):",
-        choices = occupation_choices,
-        selected = c("Lawyer", 
-                     "Software Engineer", 
-                     "Doctor","Teacher", 
-                     "Nurse", 
-                     "Engineer", 
-                     "Salesperson", 
-                     "Manager", 
-                     "Scientist",
-                     "Accountant")),
-      
-      selectInput("xaxis_choose",
-                  label = "Choose X-Axis Variable:",
-                  choices = var_choices,
-                  selected = "Age"),
-      
-      selectInput("yaxis_choose",
-                  label = "Choose Y-Axis Variable:",
-                  choices = var_choices,
-                  selected = "sleep_duration")),
-    
-    mainPanel(
-      plotOutput("final_plot"),
-      plotOutput("second_plot"),
-      tableOutput("final_table")
-      
-    )
+sleep |>
+  ggplot(aes(x = bmi_category,
+             y = sleep_quality,
+             fill = bmi_category)) +
+  geom_boxplot() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Sleep Quality Across BMI Categories",
+    x = "BMI Category",
+    y = "Sleep Quality"
   )
-)
-
-server <- function(input, output, session) {
-  
-  plot_sleep <- reactive({
-    sleep |> filter(Occupation %in% input$occupation_choose)
-  })
-  
-  output$final_plot <- renderPlot({
-    ggplot(plot_sleep(),
-           aes(x = .data[[input$xaxis_choose]],
-               y = .data[[input$yaxis_choose]],
-               color = Occupation)) +
-      geom_point(size = 2) +
-      #Used Chat GPT to create a geom_smooth for complete data
-      #Prompt: How can I create a single geom_smooth for my data that is currently grouped by color?
-      geom_smooth(aes(group = 1), 
-                  method = lm, 
-                  se = FALSE, 
-                  color = "grey90")+
-      theme_minimal(base_size = 15) +
-      labs(
-        #Used Chat GPT to learn how to use pretty_label function to clean up the titles on graph
-        # Prompt: Is there a function to clean up my labels on graphs and tables and how do I use it? Give me an example for "Title = glue::glue("Scatterplot of [[input$yaxis_choose]] vs [[input$xaxis_choose]]"
-        title = glue("Scatterplot of {pretty_label(input$yaxis_choose)} vs {pretty_label(input$xaxis_choose)}"),
-        x = pretty_label(input$xaxis_choose),
-        y = pretty_label(input$yaxis_choose),
-        color = "Occupation")+
-      scale_color_brewer(palette = "Paired")
-  })
-  
-  output$second_plot <- renderPlot({
-    ggplot(plot_sleep(),
-           aes(x = sleep_disorder,
-               fill = sleep_disorder)) +
-      geom_histogram(stat= "count")+
-      theme_minimal(base_size = 15)+
-      theme(legend.position = "none")+
-      labs(
-        title = "Sleep Disorders by Occupation",
-        x = "Sleep Disorder",
-        y = "Count")
-  })
-  
-  output$final_table <- renderTable({
-    plot_sleep() |>
-      group_by(Occupation) |>
-      summarise(
-        #Used Chat GPT to clean up table column names
-        #Prompt: How can I use pretty label and glue package to clean up these table names/labels:
-        #Max_Y = max(.data[[input$yaxis_choose]], 
-        #Mean_Y = mean(.data[[input$yaxis_choose]]), 
-        #Min_Y = min(.data[[input$yaxis_choose]]), 
-        #Max_X = max(.data[[input$xaxis_choose]], 
-        #Mean_X = mean(.data[[input$xaxis_choose]]), 
-        #Min_X = mean(.data[[input$xaxis_choose]]))
-        N = n(),
-        !!glue("Min {pretty_label(input$yaxis_choose)}")  := min(.data[[input$yaxis_choose]]),
-        !!glue("Mean {pretty_label(input$yaxis_choose)}") := mean(.data[[input$yaxis_choose]]),
-        !!glue("Max {pretty_label(input$yaxis_choose)}")  := max(.data[[input$yaxis_choose]]),
-        !!glue("Min {pretty_label(input$xaxis_choose)}")  := min(.data[[input$xaxis_choose]]),
-        !!glue("Mean {pretty_label(input$xaxis_choose)}") := mean(.data[[input$xaxis_choose]]),
-        !!glue("Max {pretty_label(input$xaxis_choose)}")  := max(.data[[input$xaxis_choose]]))
-  })
-}
-
-shinyApp(ui, server)
 ```
+
+
+## Takeaways
+
+Negative linear relationship between sleep duration and sleep levels
+
+Overweight individuals are more likely to have sleep disorders
+
+Sleep quality declines for overweight and obese individuals
+
