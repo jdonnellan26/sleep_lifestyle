@@ -8,7 +8,29 @@ editor:
 
 **Importing/Cleaning Data:**
 
+```{r}
+library(tidyverse)
+library(plotly)
 
+sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
+  rename(
+    sleep_quality = `Quality of Sleep`,
+    sleep_duration = `Sleep Duration`,
+    physical_activity = `Physical Activity Level`,
+    stress_level = `Stress Level`,
+    bmi_category = `BMI Category`,
+    sleep_disorder = `Sleep Disorder`,
+    heart_rate = `Heart Rate`) |>
+  select(-`Person ID`, -`Blood Pressure`, -`Daily Steps`)|>
+  #Used Chat GPT to learn how to use fct_relevel and str_replace:
+  #prompt: How can I adjust the response "Normal Weight" to "Normal"?
+  mutate(bmi_category = str_replace(bmi_category,"Normal Weight", "Normal"),
+         Occupation = str_replace(Occupation, "Sales Representative", "Salesperson"),
+  #Prompt: How can I reorder facets and bars in my bar graph using factor?
+         bmi_category = fct_relevel(bmi_category, "Normal", "Overweight","Obese"),
+         sleep_disorder = fct_relevel(sleep_disorder, "None", "Insomnia", "Sleep Apnea")
+  )
+```
 
 **Introduction:**
 
@@ -167,7 +189,7 @@ Graph #6
 ```{r}
 sleep |>
   ggplot(aes(x = bmi_category,
-             y = sleep_quality,
+             y = sleep_duration,
              fill = bmi_category)) +
   geom_boxplot() +
   theme_minimal() +

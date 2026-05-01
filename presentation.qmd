@@ -1,6 +1,5 @@
 ---
 title: "Final Project Presentation"
-subtitle: "How lifestyle and health factors influence sleep duration and quality"
 author: "John Donnellan"
 format: 
   revealjs:
