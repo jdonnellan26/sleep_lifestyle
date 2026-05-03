@@ -66,7 +66,7 @@ Lifestyle Variables
 
 Health Indicators
 
--   BMI Category: Categorical variable (e.g., Underweight, Normal, Overweight, Obese).
+-   BMI Category: Categorical variable (e.g., Normal, Overweight, Obese).
 
 -   Heart Rate: Recorded heart rate while sleeping.
 
@@ -185,7 +185,10 @@ sleep |>
   )
 ```
 
-Graph #6
+Interpretation:
+Graph #4 shows that sleep disorder prevalence varies noticeably by occupation. Doctors, engineers, accountants, and lawyers most commonly report having no sleep disorder, while nurses show a very high rate of sleep apnea and teachers and salespeople have much higher counts of insomnia. This suggests occupation may be associated with different types of sleep issues, potentially due to varying stress levels, work schedules, or physical demands.
+
+Graph #5
 ```{r}
 sleep |>
   ggplot(aes(x = bmi_category,
@@ -195,13 +198,16 @@ sleep |>
   theme_minimal() +
   theme(legend.position = "none") +
   labs(
-    title = "Sleep Quality Across BMI Categories",
+    title = "Sleep Duration Across BMI Categories",
     x = "BMI Category",
-    y = "Sleep Quality"
+    y = "Sleep Duration"
   )
 ```
 
-Graph #7
+Interpretation:
+Graph #5 indicates that individuals in the normal BMI category tend to have the highest median sleep duration, while overweight individuals generally sleep the least. Obese individuals show a wider range of sleep duration, suggesting more variability in sleep habits within that group.
+
+Graph #6
 ```{r}
 sleep |>
   ggplot(aes(x = sleep_disorder,
@@ -217,6 +223,8 @@ sleep |>
   )
 ```
 
+Interpretation:
+Graph #6 shows that people without a sleep disorder typically have longer and more consistent sleep durations than those with insomnia, whose sleep duration is both shorter and tightly clustered around a lower median. Individuals with sleep apnea display the greatest variability in sleep duration, indicating their sleep patterns may be less predictable despite some reporting relatively long sleep durations.
 
 **Shiny App**
 
