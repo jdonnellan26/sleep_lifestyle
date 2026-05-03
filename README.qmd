@@ -1,26 +1,139 @@
 ---
-title: "Untitled"
+title: "Read Me"
 format: gfm
 editor: visual
+prefer-html: true
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+#| message: false
+#| warning: false
+library(tidyverse)
+library(plotly)
+
+sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
+  rename(
+    sleep_quality = `Quality of Sleep`,
+    sleep_duration = `Sleep Duration`,
+    physical_activity = `Physical Activity Level`,
+    stress_level = `Stress Level`,
+    bmi_category = `BMI Category`,
+    sleep_disorder = `Sleep Disorder`,
+    heart_rate = `Heart Rate`) |>
+  select(-`Person ID`, -`Blood Pressure`, -`Daily Steps`)|>
+  #Used Chat GPT to learn how to use fct_relevel and str_replace:
+  #prompt: How can I adjust the response "Normal Weight" to "Normal"?
+  mutate(bmi_category = str_replace(bmi_category,"Normal Weight", "Normal"),
+         Occupation = str_replace(Occupation, "Sales Representative", "Salesperson"),
+  #Prompt: How can I reorder facets and bars in my bar graph using factor?
+         bmi_category = fct_relevel(bmi_category, "Normal", "Overweight","Obese"),
+         sleep_disorder = fct_relevel(sleep_disorder, "None", "Insomnia", "Sleep Apnea")
+  )
 ```
 
-You can add options to executable code like this
+## Sleep Health and Lifestyle Analysis
+
+### Project Overview
+
+This project analyzes how lifestyle and health factors influence sleep duration and sleep quality using the Sleep Health and Lifestyle Dataset from Kaggle. The dataset contains information on 374 individuals across 10 occupations, including variables related to sleep habits, stress, BMI, physical activity, and sleep disorders.
+
+### Research Question
+
+How do occupation, stress level, BMI category, physical activity, and sleep disorders affect sleep duration and sleep quality?
+
+### Variables Used:
+
+-   Gender
+-   Age
+-   Occupation
+-   Sleep Duration
+-   Quality of Sleep
+-   Physical Activity Level
+-   Stress Level
+-   BMI Category
+-   Sleep Disorder
+-   Heart Rate
+
+### Key Findings
+
+-   Occupations with shorter average sleep duration tend to report higher average stress levels.
+-   Individuals with insomnia generally sleep fewer hours than individuals without a sleep disorder.
+-   Individuals with sleep apnea show the greatest variability in sleep duration.
+-   Higher BMI categories are associated with greater prevalence of sleep disorders, especially sleep apnea.
+-   Sleep disorder prevalence varies by occupation, with some occupations showing stronger patterns of insomnia or sleep apnea.
+
+## Primary Visualizations
+
+### Stress and Sleep by Occupation
+
+This visualization shows the negative relationship between average sleep duration and average stress levels across occupations.
 
 ```{r}
-#| echo: false
-2 * 2
+by_occupation <- sleep|>
+  group_by(Occupation)|>
+  summarise(
+    n = n(),
+    avg_sleep_hrs = mean(sleep_duration),
+    avg_sleep_quality = mean(sleep_quality),
+    avg_stress = mean(stress_level),
+    avg_activity = mean(physical_activity))
+
+sleep_vs_stress <- ggplot(data = by_occupation, 
+                          aes(x = avg_sleep_hrs, 
+                              y = avg_stress, 
+                              label = Occupation, 
+                              color = Occupation))+
+  geom_point(size = 4) +
+  geom_smooth(data = sleep, 
+              aes(x = sleep_duration, 
+                  y = stress_level, 
+                  group = 1), 
+              method = lm, 
+              se = FALSE, 
+              color = "grey90")+
+  labs(
+    title = "The Effects of Stress on Sleep by Occupation",
+    x = "Average Sleep Duration",
+    y = "Average Stress Level",
+    caption = "Each point is an Occupation"
+  ) +
+  theme_minimal()+
+  theme(legend.position = "none")+
+  scale_color_brewer(palette = "Paired")
+  
+
+ggplotly(sleep_vs_stress, tooltip = "label")
+  
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+This boxplot compares sleep duration across sleep disorder groups.
+
+```{r}
+sleep |>
+  ggplot(aes(x = sleep_disorder,
+             y = sleep_duration,
+             fill = sleep_disorder)) +
+  geom_boxplot(alpha = 0.7) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()+
+  labs(
+    title = "Sleep Duration by Sleep Disorder Status",
+    x = "Sleep Disorder",
+    y = "Sleep Duration"
+  )
+```
+
+### Interactive Shiny App
+
+This project includes a Shiny app that allows users to:
+
+-   Filter occupations
+
+-   Select custom x and yaxis variables
+
+-   Generate scatterplots of sleep-related variables
+
+-   View summary statistics tables
+
+-   Explore sleep disorder distributions
