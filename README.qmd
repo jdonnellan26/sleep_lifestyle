@@ -3,6 +3,11 @@ title: "Read Me"
 format: gfm
 editor: visual
 prefer-html: true
+execute:
+  echo: false
+  warning: false
+  message: false
+  #Chat taught me how to hide code chunks
 ---
 
 ```{r}
@@ -66,7 +71,7 @@ How do occupation, stress level, BMI category, physical activity, and sleep diso
 
 ### Stress and Sleep by Occupation
 
-This visualization shows the negative relationship between average sleep duration and average stress levels across occupations.
+This plotly visualization shows the negative relationship between average sleep duration and average stress levels across occupations.
 
 ```{r}
 by_occupation <- sleep|>
