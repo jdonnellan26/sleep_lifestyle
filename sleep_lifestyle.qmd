@@ -5,8 +5,10 @@ editor:
   markdown: 
     wrap: sentence
 ---
+## Abstract
+This project analyzes the Sleep Health and Lifestyle dataset from Kaggle to explore how lifestyle and health factors relate to sleep duration and sleep quality. Using data from 374 individuals across 10 occupations, the analysis examines relationships between sleep duration, stress level, BMI category, occupation, and sleep disorders. Visualizations show that higher stress is generally associated with shorter sleep duration, higher BMI categories are linked to increased prevalence of sleep disorders, and individuals with insomnia tend to sleep fewer hours on average. These findings suggest that both occupational and health-related factors may play an important role in sleep outcomes.
 
-**Importing/Cleaning Data:**
+## Importing/Cleaning Data:
 
 ```{r}
 library(tidyverse)
@@ -32,7 +34,7 @@ sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
   )
 ```
 
-**Introduction:**
+## Introduction:
 
 This dataset from Kaggle looks at how everyday lifestyle factors relate to sleep. It includes 374 observations across 10 different occupations and contains information on sleep duration, stress levels, physical activity, BMI, and sleep disorders. The data allows us to compare sleep patterns across different groups and see how factors like stress, health, and occupation are connected to sleep.
 
@@ -70,7 +72,7 @@ Health Indicators
 
 -   Heart Rate: Recorded heart rate while sleeping.
 
-**Graph #1**
+## Distribution of Sleep Duration by Gender
 
 ```{r}
 avg <- sleep |>
@@ -95,12 +97,9 @@ ggplot(sleep, aes(x = sleep_duration)) +
   facet_grid(~Gender)
 ```
 
-Interpretation: Graph 1 introduces the variable sleep duration by showing its distribution separately for males and females.
-Females average slightly more sleep at 7.23 hours, compared with 7.04 hours for males, though the difference is small.
-Both groups show a similar pattern, with most individuals sleeping between 6 and 8 hours, and neither gender appears strongly skewed.
-This suggests that sleep duration is fairly consistent across genders, providing a balanced starting point for examining how sleep relates to other variables in the dataset.
+Interpretation: Graph 1 introduces the variable sleep duration by showing its distribution separately for males and females.Females average slightly more sleep at 7.23 hours, compared with 7.04 hours for males, though the difference is small.Both groups show a similar pattern, with most individuals sleeping between 6 and 8 hours, and neither gender appears strongly skewed.This suggests that sleep duration is fairly consistent across genders, providing a balanced starting point for examining how sleep relates to other variables in the dataset.
 
-**Graph #2**
+## Occupational Stress vs. Sleep Duration Plotly
 
 ```{r}
 by_occupation <- sleep|>
@@ -145,7 +144,7 @@ Each point represents an occupation, and the downward trend line shows a negativ
 Occupations with higher average sleep tend to report lower stress, while occupations with less sleep tend to report higher stress.
 Although this does not prove that sleep directly reduces stress, the graph suggests that sleep duration may be an important factor associated with perceived stress levels.
 
-**Graph #3:**
+## Sleep Disorders by BMI Catagory
 
 ```{r}
 ggplot(data = sleep, 
@@ -163,12 +162,12 @@ ggplot(data = sleep,
     y = "Count")
 ```
 
-Interpretation: Graph 3 shows how sleep disorders vary across BMI categories.
+Interpretation: Graph #3 shows how sleep disorders vary across BMI categories.
 Individuals in the normal BMI category most often report no sleep disorder, while those in the overweight category show noticeably higher counts of both insomnia and sleep apnea.
 In the obese category, sleep disorders make up a larger share of the group, especially sleep apnea.
 Overall, the graph suggests that as BMI increases, the likelihood of experiencing a sleep disorder also increases.
 
-Graph #4
+## Sleep Disorder by Occupation
 ```{r}
 sleep |>
   ggplot(aes(x = sleep_disorder,
@@ -188,7 +187,7 @@ sleep |>
 Interpretation:
 Graph #4 shows that sleep disorder prevalence varies noticeably by occupation. Doctors, engineers, accountants, and lawyers most commonly report having no sleep disorder, while nurses show a very high rate of sleep apnea and teachers and salespeople have much higher counts of insomnia. This suggests occupation may be associated with different types of sleep issues, potentially due to varying stress levels, work schedules, or physical demands.
 
-Graph #5
+## Sleep Duartion by BMI Catagories
 ```{r}
 sleep |>
   ggplot(aes(x = bmi_category,
@@ -207,7 +206,7 @@ sleep |>
 Interpretation:
 Graph #5 indicates that individuals in the normal BMI category tend to have the highest median sleep duration, while overweight individuals generally sleep the least. Obese individuals show a wider range of sleep duration, suggesting more variability in sleep habits within that group.
 
-Graph #6
+## Sleep Duration by Sleep Disorder
 ```{r}
 sleep |>
   ggplot(aes(x = sleep_disorder,
@@ -355,3 +354,16 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 
 ```
+
+**Conclusion**
+
+This analysis found meaningful relationships between sleep duration, stress level, BMI category, occupation, and sleep disorders. In particular, individuals with shorter sleep durations generally reported higher stress levels, while higher BMI categories were associated with a greater prevalence of sleep disorders such as sleep apnea. These findings suggest that both lifestyle and health-related factors may play an important role in overall sleep outcomes.
+
+**Limitations**
+
+One limitation of this dataset is its relatively small sample size of 374 individuals, which may limit how broadly these finding can generalize to. Additionally, the distribution of observations across occupations is uneven, with some occupations containing substantially more individuals than others.
+
+A second limitation is that several variables, such as stress level and sleep quality, rely on self-reported data. Because these measures are subjective and based on individual perception, responses may vary significantly between individuals.
+
+**Future Research**
+Given more time, I would further explore how sleep quality is measured by wearable technology platforms such as Whoop and Apple Health. I would look into how these devices calculate metrics like “sleep score,” including which variables are used to determine it. Looking back on this project, I would have liked to compare how different wearable technologies measure and record sleep data. Examining differences in how these devices calculate and report sleep metrics could lead to some interesting findings
