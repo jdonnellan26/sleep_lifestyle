@@ -75,6 +75,7 @@ How do occupation, stress level, BMI category, physical activity, and sleep diso
 This plotly visualization shows the negative relationship between average sleep duration and average stress levels across occupations.
 
 ```{r}
+#| warning: false
 by_occupation <- sleep|>
   group_by(Occupation)|>
   summarise(
@@ -104,7 +105,7 @@ ggplot(data = by_occupation,
     y = "Average Stress Level",
     caption = "Each point represents an occupation"
   ) +
-  theme_minimal() +
+  theme_minimal(base_size = 15) +
   theme(legend.position = "none") +
   scale_color_brewer(palette = "Paired")
   
@@ -117,10 +118,10 @@ sleep |>
   ggplot(aes(x = sleep_disorder,
              y = sleep_duration,
              fill = sleep_disorder)) +
-  geom_boxplot(alpha = 0.7) +
+  geom_boxplot() +
   theme_minimal() +
   theme(legend.position = "none") +
-  scale_fill_viridis_d()+
+  scale_fill_brewer()+
   labs(
     title = "Sleep Duration by Sleep Disorder Status",
     x = "Sleep Disorder",
