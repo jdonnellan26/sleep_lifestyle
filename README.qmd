@@ -15,6 +15,7 @@ execute:
 #| warning: false
 library(tidyverse)
 library(plotly)
+library(ggrepel)
 
 sleep <- read_csv("data/Sleep_health_and_lifestyle_dataset.csv")|>
   rename(
@@ -83,31 +84,29 @@ by_occupation <- sleep|>
     avg_stress = mean(stress_level),
     avg_activity = mean(physical_activity))
 
-sleep_vs_stress <- ggplot(data = by_occupation, 
-                          aes(x = avg_sleep_hrs, 
-                              y = avg_stress, 
-                              label = Occupation, 
-                              color = Occupation))+
+ggplot(data = by_occupation,
+       aes(x = avg_sleep_hrs,
+           y = avg_stress,
+           label = Occupation,
+           color = Occupation)) +
   geom_point(size = 4) +
-  geom_smooth(data = sleep, 
-              aes(x = sleep_duration, 
-                  y = stress_level, 
-                  group = 1), 
-              method = lm, 
-              se = FALSE, 
-              color = "grey90")+
+  geom_text_repel(show.legend = FALSE) +
+  geom_smooth(data = sleep,
+              aes(x = sleep_duration,
+                  y = stress_level,
+                  group = 1),
+              method = lm,
+              se = FALSE,
+              color = "grey70") +
   labs(
     title = "The Effects of Stress on Sleep by Occupation",
     x = "Average Sleep Duration",
     y = "Average Stress Level",
-    caption = "Each point is an Occupation"
+    caption = "Each point represents an occupation"
   ) +
-  theme_minimal()+
-  theme(legend.position = "none")+
+  theme_minimal() +
+  theme(legend.position = "none") +
   scale_color_brewer(palette = "Paired")
-  
-
-ggplotly(sleep_vs_stress, tooltip = "label")
   
 ```
 
