@@ -3,11 +3,6 @@ title: "Read Me"
 format: gfm
 editor: visual
 prefer-html: true
-execute:
-  echo: false
-  warning: false
-  message: false
-  #Chat taught me how to hide code chunks
 ---
 
 ```{r}
