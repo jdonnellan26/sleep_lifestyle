@@ -1,6 +1,8 @@
 ---
 title: "Sleep Lifestyle"
-format: html
+format:
+  html:
+    embed-resources: true
 editor: 
   markdown: 
     wrap: sentence
@@ -168,9 +170,7 @@ ggplot(data = sleep,
 ```
 
 **Interpretation:** This faceted bar graph shows how sleep disorders vary across BMI categories.
-Individuals in the normal BMI category most often report no sleep disorder, while those in the overweight category show noticeably higher counts of both insomnia and sleep apnea.
-In the obese category, sleep disorders make up a larger share of the group, especially sleep apnea.
-Overall, the graph suggests that as BMI increases, the likelihood of experiencing a sleep disorder also increases. A faceted bar graph was selected because it clearly compares the frequency of categorical sleep disorders across BMI groups.
+Individuals in the normal BMI category most often report no sleep disorder, while those in the overweight category show noticeably higher counts of both insomnia and sleep apnea. In the obese category, sleep disorders make up a larger share of the group, especially sleep apnea. Overall, the graph suggests that as BMI increases, the likelihood of experiencing a sleep disorder also increases. A faceted bar graph was selected because it clearly compares the frequency of categorical sleep disorders across BMI groups.
 
 ## Sleep Disorder by Occupation
 
