@@ -1,5 +1,6 @@
 # Read Me
 
+
 ## Sleep Health and Lifestyle Analysis
 
 ### Project Overview
@@ -45,12 +46,14 @@ sleep disorders affect sleep duration and sleep quality?
 
 ### Stress and Sleep by Occupation
 
-This scatterplot shows the negative relationship between
+This plotly visualization shows the negative relationship between
 average sleep duration and average stress levels across occupations.
 
-x
+![](README_files/figure-commonmark/unnamed-chunk-2-1.png)
+
 This boxplot compares sleep duration across sleep disorder groups.
 
+![](README_files/figure-commonmark/unnamed-chunk-3-1.png)
 
 ### Interactive Shiny App
 
